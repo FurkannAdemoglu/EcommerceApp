@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools">
+<data>
+    <variable
+        name="emptyViewData"
+        type="com.example.ecommerceapp.utils.EmptyView" />
+</data>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_marginHorizontal="12dp"
+    android:layout_height="wrap_content">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:layout_marginTop="10dp"
+        android:padding="10dp"
+        android:gravity="center"
+        android:text="@{emptyViewData.description}"
+        tools:text="Ürün bulunamadı"
+        />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/blue_21"
+        android:layout_marginTop="10dp"
+        android:padding="10dp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:text="@{emptyViewData.buttonText}"
+        android:textSize="20sp"
+        tools:text="Ana Sayfaya Dön"
+        />
+
+</LinearLayout>
+</layout>

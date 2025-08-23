@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.hilt)
     id("org.jetbrains.kotlin.kapt")
+    alias(libs.plugins.navigation.safe.args)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -17,7 +19,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "PRODUCTS_API_BASE_URL", Depends.BASE_URL)
     }
     buildFeatures {
         buildConfig = true
@@ -91,6 +92,14 @@ dependencies {
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.androidx.core.testing)
     androidTestImplementation(libs.coroutines.test)
+    implementation(libs.glide)
+    kapt(libs.glide.compiler)
+    val room_version = "2.7.2"
+    implementation("androidx.room:room-runtime:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
+    implementation ("androidx.recyclerview:recyclerview:1.3.1")
+    implementation ("androidx.navigation:navigation-fragment-ktx:2.7.2")
+    implementation ("androidx.navigation:navigation-ui-ktx:2.7.2")
 }
 kapt {
     correctErrorTypes = true

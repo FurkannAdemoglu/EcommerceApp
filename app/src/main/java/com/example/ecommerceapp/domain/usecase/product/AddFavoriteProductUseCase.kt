@@ -1,0 +1,16 @@
+package com.example.ecommerceapp.domain.usecase.product
+
+import com.example.ecommerceapp.base.BaseUseCase
+import com.example.ecommerceapp.domain.model.FavoriteProduct
+import com.example.ecommerceapp.domain.repository.FavoriteRepository
+import javax.inject.Inject
+
+class AddFavoriteProductUseCase @Inject constructor(
+    private val favoriteRepository: FavoriteRepository
+) :BaseUseCase<FavoriteProduct,Unit>(){
+    override suspend fun execute(param: FavoriteProduct?) {
+        if (param != null) {
+            favoriteRepository.insertFavorite(param)
+        }
+    }
+}
