@@ -34,4 +34,14 @@
         tools:layout="@layout/fragment_basket"
         >
     </fragment>
+    <fragment
+        android:id="@+id/favoriteFragment"
+        android:name="com.example.ecommerceapp.presentation.ui.favorites.FavoritesFragment"
+        android:label="fragment_favorite"
+        tools:layout="@layout/fragment_favorites"
+        >
+        <action
+            android:id="@+id/action_favoriteFragment_to_productDetailFragment"
+            app:destination="@id/productDetailFragment"/>
+    </fragment>
 </navigation>

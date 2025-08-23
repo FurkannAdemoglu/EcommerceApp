@@ -12,11 +12,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.ecommerceapp.R
 import com.example.ecommerceapp.base.BaseFragment
 import com.example.ecommerceapp.databinding.FragmentProductListBinding
-import com.example.ecommerceapp.presentation.ui.product.detail.ProductDetailUiState
 import com.example.ecommerceapp.presentation.ui.product.list.adapter.ProductListAdapter
 import com.example.ecommerceapp.presentation.ui.product.list.adapter.click.OnClicksProduct
 import com.example.ecommerceapp.presentation.ui.product.list.adapter.viewitem.ProductListViewItem
-import com.example.ecommerceapp.presentation.ui.product.list.dialog.FilterSortDialogFragment
+import com.example.ecommerceapp.presentation.ui.product.list.dialog.FilterDialogFragment
 import com.example.netflixcloneapp.utils.BottomNavigationAnnotation
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -27,13 +26,21 @@ class ProductListFragment :
     BaseFragment<FragmentProductListBinding>(R.layout.fragment_product_list) {
     private val viewModel: ProductListViewModel by viewModels()
     private val productListAdapter by lazy { ProductListAdapter() }
+    var selectedBrands = emptyList<String>()
+    var selectedModels = emptyList<String>()
+    var selectedSort: SortBy? = null
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         collectState()
         setAdapter()
         adapterOnClicks()
         binding.edTxtSearch.addTextChangedListener { text->
-            viewModel.searchProducts(text.toString())
+            viewModel.filterProducts(
+                selectedBrands = selectedBrands,
+                selectedModels = selectedModels,
+                searchQuery = text.toString(),
+                sortBy = selectedSort
+            )
         }
     }
 
@@ -52,7 +59,7 @@ class ProductListFragment :
                     is ProductListUiState.Success -> {
                         hideLoading()
                         productListAdapter.setProductListData(state.productList ?: emptyList())
-                        filterDialog(state.productList?: emptyList())
+                        filterDialog()
                     }
 
                     is ProductListUiState.AddedFavorite -> {
@@ -77,13 +84,34 @@ class ProductListFragment :
         }
     }
 
-    private fun filterDialog(productList:List<ProductListViewItem>){
+    private fun filterDialog(){
         binding.txtSelectFilter.setOnClickListener {
-            val brandList = viewModel.productList.mapNotNull { (it as? ProductListViewItem.ItemProductListViewItem)?.product?.brand }.distinct()
-            val modelList = viewModel.productList.mapNotNull { (it as? ProductListViewItem.ItemProductListViewItem)?.product?.model }.distinct()
+            val allProducts = viewModel.fullProductList
+            val brandList = allProducts
+                .mapNotNull { (it as? ProductListViewItem.ItemProductListViewItem)?.product?.brand }
+                .distinct()
+            val modelList = allProducts
+                .mapNotNull { (it as? ProductListViewItem.ItemProductListViewItem)?.product?.model }
+                .distinct()
 
-            FilterSortDialogFragment(brandList, modelList) { brand, model, sortBy ->
-                viewModel.filterAndSortProducts(brand, model, sortBy)
+
+            FilterDialogFragment(
+                brandList = brandList,
+                modelList = modelList,
+                selectedBrands = selectedBrands,
+                selectedModels = selectedModels,
+                selectedSort = selectedSort
+            ) { brands, models, sort ->
+                selectedBrands = brands
+                selectedModels = models
+                selectedSort = sort
+
+                viewModel.filterProducts(
+                    selectedBrands = selectedBrands,
+                    selectedModels = selectedModels,
+                    searchQuery = binding.edTxtSearch.text.toString(),
+                    sortBy = selectedSort
+                )
             }.show(parentFragmentManager, "filterDialog")
         }
     }

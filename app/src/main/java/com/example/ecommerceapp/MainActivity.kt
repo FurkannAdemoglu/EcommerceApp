@@ -3,11 +3,10 @@ package com.example.ecommerceapp
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.FragmentNavigator
@@ -17,6 +16,7 @@ import com.example.ecommerceapp.base.BaseActivity
 import com.example.ecommerceapp.databinding.ActivityMainBinding
 import com.example.netflixcloneapp.utils.BottomNavigationAnnotation
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity() {
@@ -35,24 +35,28 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        viewModel.loadCartItemCount()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                viewModel.cartItemCount.collect { count ->
+                    val badge = binding.bottomNav.getOrCreateBadge(R.id.nav_basket)
+                    if (count > 0) {
+                        badge.isVisible = true
+                        badge.number = count
+                    } else {
+                        badge.isVisible = false
+                    }
+                }
+            }
+        }
         viewModel.bottomState.observe(this, ::updateBottomNavigation)
     }
 
     override fun onStart() {
         navController?.addOnDestinationChangedListener(::destinationListener)
         super.onStart()
-        viewModel.loadCartItemCount()
         binding.bottomNav.setOnNavigationItemSelectedListener(::bottomMenuSelected)
         binding.bottomNav.setOnNavigationItemReselectedListener(::bottomMenuReselected)
-        viewModel.cartItemCount.observe(this){count->
-            val badge = binding.bottomNav.getOrCreateBadge(R.id.nav_basket)
-            if (count > 0) {
-                badge.isVisible = true
-                badge.number = count
-            } else {
-                badge.isVisible = false
-            }
-        }
     }
 
     override fun onStop() {
@@ -110,8 +114,14 @@ class MainActivity : BaseActivity() {
                     popUpTo(navController.graph.startDestinationId) { inclusive = false }
                 })
             }
+
             R.id.nav_basket -> {
                 navController.navigate(R.id.basketFragment, null, navOptions {
+                    popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                })
+            }
+            R.id.nav_favorites->{
+                navController.navigate(R.id.favoriteFragment, null, navOptions {
                     popUpTo(navController.graph.startDestinationId) { inclusive = false }
                 })
             }
@@ -125,7 +135,8 @@ class MainActivity : BaseActivity() {
             R.id.nav_home -> {
                 navController?.popBackStack(R.id.productListFragment, false)
             }
-            R.id.nav_basket->{
+
+            R.id.nav_basket -> {
                 navController?.popBackStack(R.id.basketFragment, false)
             }
         }

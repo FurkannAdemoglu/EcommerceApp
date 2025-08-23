@@ -1,12 +1,13 @@
 package com.example.ecommerceapp.presentation.ui.product.detail
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ecommerceapp.base.BaseViewModel
 import com.example.ecommerceapp.domain.model.CartProduct
 import com.example.ecommerceapp.domain.model.FavoriteProduct
 import com.example.ecommerceapp.domain.model.Product
 import com.example.ecommerceapp.domain.usecase.product.AddFavoriteProductUseCase
 import com.example.ecommerceapp.domain.usecase.product.AddToBasketProductUseCase
+import com.example.ecommerceapp.domain.usecase.product.GetBasketProductUseCase
 import com.example.ecommerceapp.domain.usecase.product.RemoveFavoriteUseCase
 import com.example.ecommerceapp.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,8 +21,9 @@ import javax.inject.Inject
 class ProductDetailViewModel @Inject constructor(
     private val addFavoriteProductUseCase: AddFavoriteProductUseCase,
     private val removeFavoriteUseCase: RemoveFavoriteUseCase,
-    private val addToBasketProductUseCase: AddToBasketProductUseCase
-) :ViewModel(){
+    private val addToBasketProductUseCase: AddToBasketProductUseCase,
+    private val getBasketProductUseCase: GetBasketProductUseCase
+) :BaseViewModel(getBasketProductUseCase){
     private val _uiState = MutableStateFlow<ProductDetailUiState>(ProductDetailUiState.Empty)
     val uiState: StateFlow<ProductDetailUiState> = _uiState.asStateFlow()
 
@@ -86,8 +88,9 @@ class ProductDetailViewModel @Inject constructor(
                 Resource.Loading -> {
                     _uiState.value = ProductDetailUiState.Loading
                 }
-                is Resource.Success<*> -> {
+                is Resource.Success -> {
                     _uiState.value = ProductDetailUiState.AddedBasket
+                    loadCartItemCount()
                 }
             }
             }

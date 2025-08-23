@@ -1,0 +1,121 @@
+package com.example.ecommerceapp.presentation.ui.favorites
+
+import android.os.Bundle
+import android.view.View
+import android.widget.Toast
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
+import com.example.ecommerceapp.R
+import com.example.ecommerceapp.base.BaseFragment
+import com.example.ecommerceapp.databinding.FragmentFavoritesBinding
+import com.example.ecommerceapp.presentation.ui.product.list.adapter.ProductListAdapter
+import com.example.ecommerceapp.presentation.ui.product.list.adapter.click.OnClicksProduct
+import com.example.ecommerceapp.presentation.ui.product.list.adapter.viewitem.ProductListViewItem
+import com.example.ecommerceapp.utils.EmptyView
+import com.example.netflixcloneapp.utils.BottomNavigationAnnotation
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+
+@AndroidEntryPoint
+@BottomNavigationAnnotation
+class FavoritesFragment:BaseFragment<FragmentFavoritesBinding>(R.layout.fragment_favorites) {
+    private val viewModel: FavoriteViewModel by viewModels()
+    private val productListAdapter by lazy { ProductListAdapter() }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        collectState()
+        setAdapter()
+        adapterOnClicks()
+
+    }
+    private fun setAdapter() {
+        binding.rcycFavoriteList.apply {
+            this.layoutManager = GridLayoutManager(requireContext(), 2)
+            this.adapter = productListAdapter
+
+        }
+    }
+    private fun collectState() {
+        lifecycleScope.launch {
+            viewModel.uiState.collect { state ->
+                when (state) {
+                    is FavoriteListUiState.Error -> {
+                        showAppDialog("Hata", state.message)
+                    }
+
+                    FavoriteListUiState.Loading -> {
+                        showLoading()
+                    }
+
+                    is FavoriteListUiState.Success -> {
+                        hideLoading()
+                        productListAdapter.setProductListData(state.productList ?: emptyList())
+                    }
+
+
+                    FavoriteListUiState.AddedBasket -> {
+                        hideLoading()
+                        Toast.makeText(requireContext(), "Sepete eklendi", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                    FavoriteListUiState.RemoveFavorite -> {
+                        hideLoading()
+                        Toast.makeText(requireContext(), "Favoriden kaldırıldı", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                    FavoriteListUiState.EmptyFavorite ->{
+                        productListAdapter.setProductListData(
+                            listOf(
+                                ProductListViewItem.ItemBasketEmptyViewItem(
+                                    EmptyView(
+                                        getString(
+                                            R.string.empty_favorite_description,
+                                        ),
+                                        getString(R.string.empty_favorite_button)
+                                    )
+                                )
+                            )
+                        )
+                    }
+
+                    FavoriteListUiState.Empty -> Unit
+                }
+            }
+        }
+    }
+    private fun adapterOnClicks() {
+        productListAdapter.onClick = { onClick ->
+            when (onClick) {
+                is OnClicksProduct.OnClickAddToCart -> {
+                    viewModel.addToCart(onClick.product)
+                }
+
+                is OnClicksProduct.OnClickAddToFavorite -> {
+                    viewModel.removeFromFavorite(onClick.id)
+                    productListAdapter.removeItem(onClick.position)
+                }
+
+                is OnClicksProduct.OnClickRoot -> {
+                    findNavController().navigate(
+                        FavoritesFragmentDirections.actionFavoriteFragmentToProductDetailFragment(
+                            onClick.product
+                        )
+                    )
+                }
+            }
+        }
+        productListAdapter.onClickEmpty={
+            findNavController().popBackStack(R.id.productListFragment, false)
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewModel.dispose()
+    }
+}

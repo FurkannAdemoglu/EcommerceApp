@@ -2,6 +2,7 @@ package com.example.ecommerceapp.data.datasource.local.cart
 
 import com.example.ecommerceapp.data.local.CartDao
 import com.example.ecommerceapp.domain.model.CartProduct
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,7 +35,7 @@ class CartLocalDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAllCartProducts(): List<CartProduct> {
+    override suspend fun getAllCartProducts(): Flow<List<CartProduct>> {
         return cartDao.getAllCartProduct()
     }
 

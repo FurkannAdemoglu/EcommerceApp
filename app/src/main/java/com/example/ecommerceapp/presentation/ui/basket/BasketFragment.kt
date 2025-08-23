@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.example.ecommerceapp.R
 import com.example.ecommerceapp.base.BaseFragment
 import com.example.ecommerceapp.databinding.FragmentBasketBinding
@@ -92,5 +93,9 @@ class BasketFragment : BaseFragment<FragmentBasketBinding>(R.layout.fragment_bas
                 }
             }
         }
+        basketAdapter.onClickEmptyButton={
+            findNavController().popBackStack(R.id.productListFragment, false)
+        }
     }
+
 }

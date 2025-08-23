@@ -3,6 +3,7 @@ package com.example.ecommerceapp.data.repository
 import com.example.ecommerceapp.data.datasource.local.cart.CartLocalDataSource
 import com.example.ecommerceapp.domain.model.CartProduct
 import com.example.ecommerceapp.domain.repository.CartRepository
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,7 +23,7 @@ class CartRepositoryImpl @Inject constructor(
        cartLocalDataSource.deleteCart(cartProduct)
     }
 
-    override suspend fun getAllCartProducts(): List<CartProduct> {
+    override suspend fun getAllCartProducts(): Flow<List<CartProduct>> {
        return cartLocalDataSource.getAllCartProducts()
     }
 

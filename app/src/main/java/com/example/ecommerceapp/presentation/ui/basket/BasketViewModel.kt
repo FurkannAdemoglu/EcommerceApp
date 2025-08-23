@@ -32,7 +32,7 @@ class BasketViewModel @Inject constructor(
         getCartProductList()
     }
 
-    fun getCartProductList() {
+    private fun getCartProductList() {
         viewModelScope.launch {
             getBasketProductUseCase.invoke().collect { response ->
                 when (response) {
@@ -46,14 +46,12 @@ class BasketViewModel @Inject constructor(
                         if (response.data.isNullOrEmpty()){
                             _uiState.value = BasketListUiState.EmptySuccess
                         }else{
-                            response.data?.map { product ->
+                            response.data.map { product ->
                                 productList.add(BasketListViewItem.ItemProductBasketListViewItem(product))
                             }
                             cartList.addAll(response.data)
                             _uiState.value = BasketListUiState.Success(productList)
                         }
-
-
                     }
 
                     is Resource.Error -> {
@@ -114,6 +112,7 @@ class BasketViewModel @Inject constructor(
 
                     is Resource.Success -> {
                         _uiState.value = BasketListUiState.DeleteSuccess
+                        getCartProductList()
                     }
 
                     is Resource.Error -> {

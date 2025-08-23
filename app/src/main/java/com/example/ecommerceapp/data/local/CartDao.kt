@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.ecommerceapp.domain.model.CartProduct
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CartDao {
@@ -26,7 +27,7 @@ interface CartDao {
     suspend fun decreaseQuantity(id: String)
 
     @Query("SELECT * FROM cart_products")
-    suspend fun getAllCartProduct():List<CartProduct>
+    fun getAllCartProduct(): Flow<List<CartProduct>>
 
     @Delete
     suspend fun deleteAll(items:List<CartProduct>)

@@ -2,4 +2,7 @@
     <string name="app_name">EcommerceApp</string>
     <string name="empty_basket_description">Sepetiniz boş görünüyor</string>
     <string name="empty_basket_button">Alışverişe Başla</string>
+
+    <string name="empty_favorite_description">Favorileriniz Boş Görünüyor</string>
+    <string name="empty_favorite_button">Keşfetmeye başla</string>
 </resources>

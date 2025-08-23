@@ -3,7 +3,9 @@ package com.example.ecommerceapp.presentation.ui.basket.adapter
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ecommerceapp.R
+import com.example.ecommerceapp.base.ItemEmptyViewHolder
 import com.example.ecommerceapp.databinding.ItemBasketProductBinding
+import com.example.ecommerceapp.databinding.ItemEmptyViewBinding
 import com.example.ecommerceapp.presentation.ui.basket.adapter.click.OnClickBasketButton
 import com.example.ecommerceapp.presentation.ui.basket.adapter.viewholder.ItemBasketProductViewHolder
 import com.example.ecommerceapp.presentation.ui.basket.adapter.viewitem.BasketListViewItem
@@ -13,10 +15,14 @@ import com.example.ecommerceapp.utils.viewBinding
 class BasketAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     private val productListData = mutableListOf<BasketListViewItem>()
     lateinit var onClick:((onClickBasket:OnClickBasketButton)->Unit)
+    lateinit var onClickEmptyButton:(()->Unit)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when(viewType){
             R.layout.item_basket_product->{
                 ItemBasketProductViewHolder(parent.viewBinding(ItemBasketProductBinding::inflate),onClick)
+            }
+            R.layout.item_empty_view->{
+                ItemEmptyViewHolder(parent.viewBinding(ItemEmptyViewBinding::inflate),onClickEmptyButton)
             }
             else-> throw IllegalArgumentException("Invalid view type provided")
         }
@@ -29,7 +35,7 @@ class BasketAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
             }
 
             is BasketListViewItem.ItemBasketEmptyViewItem -> {
-
+                (holder as ItemEmptyViewHolder).bind(data.emptyView)
             }
         }
     }

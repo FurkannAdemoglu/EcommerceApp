@@ -1,15 +1,15 @@
 package com.example.ecommerceapp.presentation.ui.product.list
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ecommerceapp.base.BaseViewModel
 import com.example.ecommerceapp.domain.model.CartProduct
 import com.example.ecommerceapp.domain.model.FavoriteProduct
 import com.example.ecommerceapp.domain.model.Product
 import com.example.ecommerceapp.domain.usecase.product.AddFavoriteProductUseCase
 import com.example.ecommerceapp.domain.usecase.product.AddToBasketProductUseCase
+import com.example.ecommerceapp.domain.usecase.product.GetBasketProductUseCase
 import com.example.ecommerceapp.domain.usecase.product.GetProductsUseCase
 import com.example.ecommerceapp.domain.usecase.product.RemoveFavoriteUseCase
-import com.example.ecommerceapp.presentation.ui.product.detail.ProductDetailUiState
 import com.example.ecommerceapp.presentation.ui.product.list.adapter.viewitem.ProductListViewItem
 import com.example.ecommerceapp.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,11 +26,13 @@ class ProductListViewModel @Inject constructor(
     private val getProductsUseCase: GetProductsUseCase,
     private val addFavoriteProductUseCase: AddFavoriteProductUseCase,
     private val removeFavoriteUseCase: RemoveFavoriteUseCase,
-    private val addToBasketProductUseCase: AddToBasketProductUseCase
-) : ViewModel() {
+    private val addToBasketProductUseCase: AddToBasketProductUseCase,
+    private val getBasketProductUseCase: GetBasketProductUseCase
+) : BaseViewModel(getBasketProductUseCase) {
     private val _uiState = MutableStateFlow<ProductListUiState>(ProductListUiState.Loading)
     val uiState: StateFlow<ProductListUiState> = _uiState.asStateFlow()
-    val productList = mutableListOf<ProductListViewItem>()
+    val fullProductList = mutableListOf<ProductListViewItem>()
+    private var filteredProductList = mutableListOf<ProductListViewItem>()
     private val pageSize = 4
     private var currentIndex = 0
 
@@ -42,22 +44,18 @@ class ProductListViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             getProductsUseCase.invoke().collect { response ->
                 when (response) {
-                    is Resource.Loading -> {
-                        _uiState.value = ProductListUiState.Loading
-                    }
-
+                    is Resource.Loading -> _uiState.value = ProductListUiState.Loading
                     is Resource.Success -> {
-                        productList.clear()
+                        fullProductList.clear()
                         response.data?.map { product ->
-                            productList.add(ProductListViewItem.ItemProductListViewItem(product))
+                            fullProductList.add(ProductListViewItem.ItemProductListViewItem(product))
                         }
                         currentIndex = 0
-                        loadNextPage()
+                        // Filtre yoksa, tüm listeyi göster
+                        filteredProductList = fullProductList.toMutableList()
+                        loadNextPage(reset = true)
                     }
-
-                    is Resource.Error -> {
-                        _uiState.value = ProductListUiState.Error(response.message)
-                    }
+                    is Resource.Error -> _uiState.value = ProductListUiState.Error(response.message)
                 }
             }
         }
@@ -97,20 +95,23 @@ class ProductListViewModel @Inject constructor(
         }
     }
 
-    fun loadNextPage() {
-        if (currentIndex >= productList.size) return
+    fun loadNextPage(reset: Boolean = false) {
+        if (reset) currentIndex = 0
 
-        val nextIndex = (currentIndex + pageSize).coerceAtMost(productList.size)
-        val pageItems = productList.subList(currentIndex, nextIndex)
+        if (currentIndex >= filteredProductList.size) return
+
+        val nextIndex = (currentIndex + pageSize).coerceAtMost(filteredProductList.size)
+        val pageItems = filteredProductList.subList(currentIndex, nextIndex)
         currentIndex = nextIndex
 
         val currentList =
-            (_uiState.value as? ProductListUiState.Success)?.productList?.toMutableList()
-                ?: mutableListOf()
+            if (reset) mutableListOf()
+            else (_uiState.value as? ProductListUiState.Success)?.productList?.toMutableList() ?: mutableListOf()
 
         currentList.addAll(pageItems)
         _uiState.value = ProductListUiState.Success(currentList)
     }
+
 
     fun addToCart(product: Product) {
         viewModelScope.launch {
@@ -129,47 +130,49 @@ class ProductListViewModel @Inject constructor(
                     Resource.Loading -> {
                         _uiState.value = ProductListUiState.Loading
                     }
-                    is Resource.Success<*> -> {
+                    is Resource.Success -> {
                         _uiState.value = ProductListUiState.AddedBasket
+                        loadCartItemCount()
                     }
                 }
             }
         }
     }
 
-    fun searchProducts(query: String) {
+    fun filterProducts(
+        selectedBrands: List<String> = emptyList(),
+        selectedModels: List<String> = emptyList(),
+        searchQuery: String = "",
+        sortBy: SortBy? = null
+    ) {
         viewModelScope.launch(Dispatchers.Default) {
-            val filteredList = if(query.isEmpty()) productList else productList.filter { item ->
-                when(item) {
-                    is ProductListViewItem.ItemProductListViewItem -> {
-                        item.product.name.contains(query, ignoreCase = true)
-                    }
-                    else -> false
-                }
+            filteredProductList = fullProductList.filter { item ->
+                if (item is ProductListViewItem.ItemProductListViewItem) {
+                    val matchesBrand = selectedBrands.isEmpty() || selectedBrands.contains(item.product.brand)
+                    val matchesModel = selectedModels.isEmpty() || selectedModels.contains(item.product.model)
+                    val matchesSearch = searchQuery.isEmpty() || (
+                            item.product.name.contains(searchQuery, true) ||
+                                    item.product.brand.contains(searchQuery, true) ||
+                                    item.product.model.contains(searchQuery, true)
+                            )
+                    matchesBrand && matchesModel && matchesSearch
+                } else false
+            }.toMutableList()
+
+            // Sıralama
+            filteredProductList = when(sortBy) {
+                SortBy.PRICE_ASC -> filteredProductList.sortedBy { (it as ProductListViewItem.ItemProductListViewItem).product.price.toDouble() }.toMutableList()
+                SortBy.PRICE_DESC -> filteredProductList.sortedByDescending { (it as ProductListViewItem.ItemProductListViewItem).product.price.toDouble() }.toMutableList()
+                SortBy.DATE_NEWEST -> filteredProductList.sortedByDescending { Instant.parse((it as ProductListViewItem.ItemProductListViewItem).product.createdAt) }.toMutableList()
+                SortBy.DATE_OLDEST -> filteredProductList.sortedBy { Instant.parse((it as ProductListViewItem.ItemProductListViewItem).product.createdAt) }.toMutableList()
+                null -> filteredProductList
             }
 
-            _uiState.value = ProductListUiState.Success(filteredList)
+            currentIndex = 0
+            loadNextPage(reset = true)
         }
     }
-    fun filterAndSortProducts(brand: String?, model: String?, sortBy: SortBy?) {
-        var filteredList = productList.filter { item ->
-            if (item is ProductListViewItem.ItemProductListViewItem) {
-                val matchesBrand = brand.isNullOrEmpty() || item.product.brand.equals(brand, ignoreCase = true)
-                val matchesModel = model.isNullOrEmpty() || item.product.model.equals(model, ignoreCase = true)
-                matchesBrand && matchesModel
-            } else false
-        }
 
-        filteredList = when(sortBy) {
-            SortBy.PRICE_ASC -> filteredList.sortedBy { (it as ProductListViewItem.ItemProductListViewItem).product.price.toDouble() }
-            SortBy.PRICE_DESC -> filteredList.sortedByDescending { (it as ProductListViewItem.ItemProductListViewItem).product.price.toDouble() }
-            SortBy.DATE_NEWEST -> filteredList.sortedByDescending { Instant.parse((it as ProductListViewItem.ItemProductListViewItem).product.createdAt) }
-            SortBy.DATE_OLDEST -> filteredList.sortedBy { Instant.parse((it as ProductListViewItem.ItemProductListViewItem).product.createdAt) }
-            null -> filteredList
-        }
-
-        _uiState.value = ProductListUiState.Success(filteredList)
-    }
 }
 
 sealed interface ProductListUiState {

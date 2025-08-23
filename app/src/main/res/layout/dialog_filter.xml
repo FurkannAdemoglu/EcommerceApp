@@ -1,46 +1,69 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_height="wrap_content">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Brand" />
-
-    <Spinner
-        android:id="@+id/brandSpinner"
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Model" />
+        <!-- Clear Filters -->
+        <Button
+            android:id="@+id/clearFiltersButton"
+            android:text="Tümünü Temizle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
-    <Spinner
-        android:id="@+id/modelSpinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <!-- Brand Section -->
+        <TextView android:text="Brand" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <EditText
+            android:id="@+id/brandSearchEditText"
+            android:hint="Brand ara..."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"/>
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:scrollbars="vertical">
+            <LinearLayout
+                android:id="@+id/brandContainer"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </ScrollView>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Sırala" />
+        <!-- Model Section -->
+        <TextView android:text="Model" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
+        <EditText
+            android:id="@+id/modelSearchEditText"
+            android:hint="Model ara..."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"/>
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:scrollbars="vertical">
+            <LinearLayout
+                android:id="@+id/modelContainer"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </ScrollView>
 
-    <Spinner
-        android:id="@+id/sortSpinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <!-- Sort -->
+        <TextView android:text="Sırala" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
+        <Spinner android:id="@+id/sortSpinner" android:layout_width="match_parent" android:layout_height="wrap_content"/>
 
-    <Button
-        android:id="@+id/applyFilterButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Uygula" />
-</LinearLayout>
+        <!-- Apply Button -->
+        <Button
+            android:id="@+id/applyFilterButton"
+            android:text="Uygula"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"/>
+    </LinearLayout>
+</ScrollView>
