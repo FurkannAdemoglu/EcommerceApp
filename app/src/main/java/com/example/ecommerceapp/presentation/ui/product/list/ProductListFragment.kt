@@ -42,6 +42,7 @@ class ProductListFragment :
                 sortBy = selectedSort
             )
         }
+        filterDialog()
     }
 
     private fun collectState() {
@@ -59,7 +60,7 @@ class ProductListFragment :
                     is ProductListUiState.Success -> {
                         hideLoading()
                         productListAdapter.setProductListData(state.productList ?: emptyList())
-                        filterDialog()
+
                     }
 
                     is ProductListUiState.AddedFavorite -> {

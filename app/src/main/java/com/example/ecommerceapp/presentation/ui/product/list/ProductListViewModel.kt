@@ -51,7 +51,6 @@ class ProductListViewModel @Inject constructor(
                             fullProductList.add(ProductListViewItem.ItemProductListViewItem(product))
                         }
                         currentIndex = 0
-                        // Filtre yoksa, tüm listeyi göster
                         filteredProductList = fullProductList.toMutableList()
                         loadNextPage(reset = true)
                     }

@@ -2,6 +2,7 @@ package com.example.ecommerceapp.data.datasource.local.favorite
 
 import com.example.ecommerceapp.data.local.FavoriteDao
 import com.example.ecommerceapp.domain.model.FavoriteProduct
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,7 +18,7 @@ class FavoriteLocalDataSourceImpl @Inject constructor(
         favoriteDao.deleteFavorite(favoriteProduct)
     }
 
-    override suspend fun getAllFavorites(): List<FavoriteProduct> {
+    override suspend fun getAllFavorites(): Flow<List<FavoriteProduct>> {
        return favoriteDao.getAllFavorites()
     }
 }

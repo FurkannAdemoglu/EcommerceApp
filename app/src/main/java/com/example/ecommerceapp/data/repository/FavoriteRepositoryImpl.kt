@@ -3,6 +3,7 @@ package com.example.ecommerceapp.data.repository
 import com.example.ecommerceapp.data.datasource.local.favorite.FavoriteLocalDataSource
 import com.example.ecommerceapp.domain.model.FavoriteProduct
 import com.example.ecommerceapp.domain.repository.FavoriteRepository
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,7 +19,7 @@ class FavoriteRepositoryImpl @Inject constructor(
        localDataSource.deleteFavorite(favoriteProduct)
     }
 
-    override suspend fun getAllFavorites(): List<FavoriteProduct> {
+    override suspend fun getAllFavorites(): Flow<List<FavoriteProduct>> {
         return localDataSource.getAllFavorites()
     }
 }

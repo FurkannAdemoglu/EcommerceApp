@@ -7,6 +7,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.ecommerceapp.R
 import com.example.ecommerceapp.base.BaseFragment
 import com.example.ecommerceapp.databinding.FragmentFavoritesBinding
@@ -33,9 +34,7 @@ class FavoritesFragment:BaseFragment<FragmentFavoritesBinding>(R.layout.fragment
     }
     private fun setAdapter() {
         binding.rcycFavoriteList.apply {
-            this.layoutManager = GridLayoutManager(requireContext(), 2)
             this.adapter = productListAdapter
-
         }
     }
     private fun collectState() {
@@ -52,6 +51,7 @@ class FavoritesFragment:BaseFragment<FragmentFavoritesBinding>(R.layout.fragment
 
                     is FavoriteListUiState.Success -> {
                         hideLoading()
+                        binding.rcycFavoriteList.layoutManager = GridLayoutManager(requireContext(), 2)
                         productListAdapter.setProductListData(state.productList ?: emptyList())
                     }
 
@@ -69,6 +69,7 @@ class FavoritesFragment:BaseFragment<FragmentFavoritesBinding>(R.layout.fragment
                     }
 
                     FavoriteListUiState.EmptyFavorite ->{
+                        binding.rcycFavoriteList.layoutManager = LinearLayoutManager(requireContext())
                         productListAdapter.setProductListData(
                             listOf(
                                 ProductListViewItem.ItemBasketEmptyViewItem(

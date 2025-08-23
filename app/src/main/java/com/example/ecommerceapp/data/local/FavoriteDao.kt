@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.ecommerceapp.domain.model.FavoriteProduct
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FavoriteDao {
@@ -19,5 +20,5 @@ interface FavoriteDao {
     suspend fun isFavorite(id: String): Boolean
 
     @Query("SELECT * FROM favorite_products")
-    suspend fun getAllFavorites(): List<FavoriteProduct>
+    fun getAllFavorites(): Flow<List<FavoriteProduct>>
 }
