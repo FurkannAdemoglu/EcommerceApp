@@ -53,28 +53,13 @@ class ProductListFragment :
         if (requireContext().isConnected()) {
             viewModel.getProductList()
         } else {
-            showNoInternetDialogLoop()
+            showNoInternetDialogLoop{
+                viewModel.getProductList(true)
+            }
         }
     }
 
-    private fun showNoInternetDialogLoop() {
-        val dialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
-            .setTitle("İnternet Bağlantısı Yok")
-            .setMessage("İnternet açılınca ürünler tekrar yüklenecek.")
-            .setCancelable(false)
-            .setPositiveButton("Tamam") { dialogInterface, _ ->
-                dialogInterface.dismiss()
-                lifecycleScope.launch {
-                    if (!requireContext().isConnected()) {
-                        delay(500)
-                        showNoInternetDialogLoop()
-                    } else {
-                        viewModel.getProductList()
-                    }
-                }
-            }.create()
-        dialog.show()
-    }
+
 
     private fun collectState() {
         lifecycleScope.launch {
@@ -84,24 +69,43 @@ class ProductListFragment :
                         hideLoading()
                         showAppDialog(getString(R.string.error_text), state.message)
                     }
+
                     ProductListUiState.Loading -> showLoading()
                     is ProductListUiState.Success -> {
                         hideLoading()
                         productListAdapter.setProductListData(state.productList ?: emptyList())
                     }
-                    is ProductListUiState.AddedFavorite -> {
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.uiEvent.collect { event ->
+                when (event) {
+                    ProductListUiEvent.AddedFavorite ->{
                         hideLoading()
-                        requireContext().openToast(getString(R.string.added_to_favorites), Toast.LENGTH_SHORT)
+                        requireContext().openToast(
+                            getString(R.string.added_to_favorites),
+                            Toast.LENGTH_SHORT
+                        )
                     }
-                    ProductListUiState.AddedBasket -> {
+
+                    ProductListUiEvent.RemovedFavorite ->{
                         hideLoading()
-                        requireContext().openToast(getString(R.string.added_to_basket), Toast.LENGTH_SHORT)
+                        requireContext().openToast(
+                            getString(R.string.removed_favorites),
+                            Toast.LENGTH_SHORT
+                        )
                     }
-                    ProductListUiState.RemoveFavorite -> {
+
+                    ProductListUiEvent.AddedBasket ->{
                         hideLoading()
-                        requireContext().openToast(getString(R.string.removed_favorites), Toast.LENGTH_SHORT)
+                        requireContext().openToast(
+                            getString(R.string.added_to_basket),
+                            Toast.LENGTH_SHORT
+                        )
                     }
-                    ProductListUiState.Empty -> Unit
+
                 }
             }
         }
@@ -162,16 +166,14 @@ class ProductListFragment :
                     viewModel.toggleFavorite(onClick.isFavorite, onClick.id)
                     productListAdapter.updateItem(onClick.position, onClick.isFavorite)
                 }
+
                 is OnClicksProduct.OnClickRoot -> findNavController().navigate(
-                    ProductListFragmentDirections.actionProductListFragmentToProductDetailFragment(onClick.product)
+                    ProductListFragmentDirections.actionProductListFragmentToProductDetailFragment(
+                        onClick.product
+                    )
                 )
             }
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        viewModel.dispose()
     }
 
     override fun setupToolbar() {

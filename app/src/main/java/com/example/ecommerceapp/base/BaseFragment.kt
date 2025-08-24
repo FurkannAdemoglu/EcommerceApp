@@ -11,9 +11,13 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.ecommerceapp.R
+import com.example.ecommerceapp.utils.isConnected
 import com.google.android.material.appbar.MaterialToolbar
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 abstract class BaseFragment<DB : ViewDataBinding>(
@@ -95,6 +99,25 @@ abstract class BaseFragment<DB : ViewDataBinding>(
 
     fun hideLoading() {
         progressDialog?.dismiss()
+    }
+
+    protected fun showNoInternetDialogLoop(onConnectionSuccess:(()->Unit)?) {
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle("İnternet Bağlantısı Yok")
+            .setMessage("İnternet açılınca ürünler tekrar yüklenecek.")
+            .setCancelable(false)
+            .setPositiveButton("Tamam") { dialogInterface, _ ->
+                dialogInterface.dismiss()
+                lifecycleScope.launch {
+                    if (!requireContext().isConnected()) {
+                        delay(500)
+                        showNoInternetDialogLoop(onConnectionSuccess)
+                    } else {
+                        onConnectionSuccess?.invoke()
+                    }
+                }
+            }.create()
+        dialog.show()
     }
     abstract fun setupToolbar()
 }

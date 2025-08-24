@@ -91,8 +91,21 @@ class FavoriteViewModel @Inject constructor(
 
     fun removeFromFavorite(id:String){
         viewModelScope.launch {
-            removeFavoriteUseCase.invoke(FavoriteProduct(id)).collect{
+            removeFavoriteUseCase.invoke(FavoriteProduct(id)).collect{response->
+                when (response) {
+                    is Resource.Error -> {
+                        _uiState.value = FavoriteListUiState.Error(response.message)
+                    }
 
+                    Resource.Loading -> {
+                        _uiState.value = FavoriteListUiState.Loading
+                    }
+
+                    is Resource.Success -> {
+                        _uiState.value = FavoriteListUiState.RemoveFavorite
+                        loadCartItemCount()
+                    }
+                }
             }
         }
     }
@@ -100,8 +113,6 @@ class FavoriteViewModel @Inject constructor(
     fun dispose(){
         _uiState.value = FavoriteListUiState.Empty
     }
-
-
 }
 
 sealed interface FavoriteListUiState {

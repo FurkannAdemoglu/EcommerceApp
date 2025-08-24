@@ -16,7 +16,9 @@ import com.example.ecommerceapp.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -34,6 +36,9 @@ class ProductListViewModel @Inject constructor(
 ) : BaseViewModel(getBasketProductUseCase) {
     private val _uiState = MutableStateFlow<ProductListUiState>(ProductListUiState.Loading)
     val uiState: StateFlow<ProductListUiState> = _uiState.asStateFlow()
+
+    private val _uiEvent = MutableSharedFlow<ProductListUiEvent>()
+    val uiEvent: SharedFlow<ProductListUiEvent> = _uiEvent
     val fullProductList = mutableListOf<ProductListViewItem>()
     private var filteredProductList = mutableListOf<ProductListViewItem>()
     var selectedBrands = emptyList<String>()
@@ -43,7 +48,13 @@ class ProductListViewModel @Inject constructor(
     private var currentIndex = 0
 
 
-    fun getProductList() {
+    fun getProductList(forceRefresh: Boolean = false) {
+        if (fullProductList.isNotEmpty() && !forceRefresh) {
+            _uiState.value = ProductListUiState.Success(
+                (_uiState.value as? ProductListUiState.Success)?.productList ?: fullProductList
+            )
+            return
+        }
         viewModelScope.launch(ioDispatcher) {
             getProductsUseCase.invoke().collect { response ->
                 when (response) {
@@ -71,11 +82,9 @@ class ProductListViewModel @Inject constructor(
                         is Resource.Error -> {
                             _uiState.value = ProductListUiState.Error(response.message)
                         }
-                        Resource.Loading -> {
-                            _uiState.value = ProductListUiState.Loading
-                        }
-                        is Resource.Success<*> -> {
-                            _uiState.value = ProductListUiState.RemoveFavorite
+                        Resource.Loading -> Unit
+                        is Resource.Success -> {
+                            _uiEvent.emit(ProductListUiEvent.RemovedFavorite)
                         }
                     }
                 }
@@ -85,11 +94,9 @@ class ProductListViewModel @Inject constructor(
                         is Resource.Error -> {
                             _uiState.value = ProductListUiState.Error(response.message)
                         }
-                        Resource.Loading -> {
-                            _uiState.value = ProductListUiState.Loading
-                        }
-                        is Resource.Success<*> -> {
-                            _uiState.value = ProductListUiState.AddedFavorite
+                        Resource.Loading -> Unit
+                        is Resource.Success -> {
+                            _uiEvent.emit(ProductListUiEvent.AddedFavorite)
                         }
                     }
                 }
@@ -129,11 +136,9 @@ class ProductListViewModel @Inject constructor(
                     is Resource.Error -> {
                         _uiState.value = ProductListUiState.Error(response.message)
                     }
-                    Resource.Loading -> {
-                        _uiState.value = ProductListUiState.Loading
-                    }
+                    Resource.Loading -> Unit
                     is Resource.Success -> {
-                        _uiState.value = ProductListUiState.AddedBasket
+                        _uiEvent.emit(ProductListUiEvent.AddedBasket)
                         loadCartItemCount()
                     }
                 }
@@ -174,20 +179,20 @@ class ProductListViewModel @Inject constructor(
         }
     }
 
-    fun dispose(){
-        _uiState.value = ProductListUiState.Empty
-    }
+
 
 }
 
 sealed interface ProductListUiState {
     data object Loading : ProductListUiState
     data class Success(val productList: List<ProductListViewItem>?) : ProductListUiState
-    data object AddedFavorite:ProductListUiState
-    data object RemoveFavorite:ProductListUiState
-    data object Empty:ProductListUiState
-    data object AddedBasket:ProductListUiState
     data class Error(val message: String) : ProductListUiState
+}
+
+sealed interface ProductListUiEvent {
+    data object AddedFavorite: ProductListUiEvent
+    data object RemovedFavorite: ProductListUiEvent
+    data object AddedBasket: ProductListUiEvent
 }
 
 enum class SortBy { PRICE_ASC, PRICE_DESC, DATE_NEWEST, DATE_OLDEST }

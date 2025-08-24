@@ -15,6 +15,7 @@ import com.example.ecommerceapp.presentation.ui.product.list.adapter.ProductList
 import com.example.ecommerceapp.presentation.ui.product.list.adapter.click.OnClicksProduct
 import com.example.ecommerceapp.presentation.ui.product.list.adapter.viewitem.ProductListViewItem
 import com.example.ecommerceapp.utils.EmptyView
+import com.example.ecommerceapp.utils.isConnected
 import com.example.ecommerceapp.utils.openToast
 import com.example.netflixcloneapp.utils.BottomNavigationAnnotation
 import dagger.hilt.android.AndroidEntryPoint
@@ -31,8 +32,17 @@ class FavoritesFragment:BaseFragment<FragmentFavoritesBinding>(R.layout.fragment
         collectState()
         setAdapter()
         adapterOnClicks()
+        checkInternetAndLoad()
         viewModel.getProductList()
-
+    }
+    private fun checkInternetAndLoad() {
+        if (requireContext().isConnected()) {
+            viewModel.getProductList()
+        } else {
+            showNoInternetDialogLoop{
+                viewModel.getProductList()
+            }
+        }
     }
     private fun setAdapter() {
         binding.rcycFavoriteList.apply {
@@ -44,6 +54,7 @@ class FavoritesFragment:BaseFragment<FragmentFavoritesBinding>(R.layout.fragment
             viewModel.uiState.collect { state ->
                 when (state) {
                     is FavoriteListUiState.Error -> {
+                        hideLoading()
                         showAppDialog(getString(R.string.error_text), state.message)
                     }
 
