@@ -1,5 +1,6 @@
 package com.example.ecommerceapp.utils
 
+import android.view.View
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
@@ -13,4 +14,9 @@ fun ImageView.loadImage(url: String?) {
         .error(R.color.gray_ec)
         .diskCacheStrategy(DiskCacheStrategy.ALL)
         .into(this)
+}
+
+@BindingAdapter("isVisible")
+fun View.setIsVisible(visible: Boolean) {
+    this.visibility = if (visible) View.VISIBLE else View.GONE
 }

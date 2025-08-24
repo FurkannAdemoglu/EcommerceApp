@@ -32,19 +32,27 @@ class BasketFragment : BaseFragment<FragmentBasketBinding>(R.layout.fragment_bas
 
     }
 
+    override fun setupToolbar() {
+        configureToolbar(getString(R.string.e_market),false)
+    }
+
     private fun collectState() {
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
                 when (state) {
                     is BasketListUiState.Error -> {
-
+                        hideLoading()
+                        showAppDialog(getString(R.string.error_text), state.message)
                     }
 
                     BasketListUiState.Loading -> {
-
+                        showLoading()
                     }
 
                     is BasketListUiState.Success -> {
+                        hideLoading()
+                        binding.listEmpty = false
+                        binding.totalPrice = state.totalPrice
                         basketAdapter.setBasketListData(state.cartProductList ?: emptyList())
                         binding.txtComplete.setOnClickListener {
                             viewModel.deleteAllBasket()
@@ -52,11 +60,14 @@ class BasketFragment : BaseFragment<FragmentBasketBinding>(R.layout.fragment_bas
                     }
 
                     BasketListUiState.DeleteSuccess -> {
+                        hideLoading()
                         Toast.makeText(requireContext(), "Siparişiniz Alındı", Toast.LENGTH_LONG)
                             .show()
                     }
 
                     BasketListUiState.EmptySuccess -> {
+                        hideLoading()
+                        binding.listEmpty = true
                         basketAdapter.setBasketListData(
                             listOf(
                                 BasketListViewItem.ItemBasketEmptyViewItem(
@@ -93,7 +104,7 @@ class BasketFragment : BaseFragment<FragmentBasketBinding>(R.layout.fragment_bas
                 }
             }
         }
-        basketAdapter.onClickEmptyButton={
+        basketAdapter.onClickEmptyButton = {
             findNavController().popBackStack(R.id.productListFragment, false)
         }
     }

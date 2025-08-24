@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-
+<data>
+    <variable
+        name="listEmpty"
+        type="Boolean" />
+    <variable
+        name="totalPrice"
+        type="String" />
+</data>
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -25,6 +32,7 @@
         android:layout_marginStart="10dp"
         android:layout_marginBottom="10dp"
         android:text="Total"
+        app:isVisible="@{!listEmpty}"
         android:textSize="20sp"
         android:textColor="@color/blue_21"
         app:layout_constraintBottom_toTopOf="@id/txtProductPrice"
@@ -34,6 +42,8 @@
         android:id="@+id/txtProductPrice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:isVisible="@{!listEmpty}"
+        android:text="@{totalPrice}"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="10dp"
         app:layout_constraintStart_toStartOf="@id/txtPrice"
@@ -47,6 +57,7 @@
         android:textSize="20sp"
         android:paddingHorizontal="20dp"
         android:background="@color/blue_21"
+        app:isVisible="@{!listEmpty}"
         android:textColor="@color/white"
         android:layout_marginBottom="10dp"
         android:layout_marginEnd="10dp"

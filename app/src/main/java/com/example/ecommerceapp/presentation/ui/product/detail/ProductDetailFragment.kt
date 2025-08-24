@@ -9,6 +9,7 @@ import androidx.navigation.fragment.navArgs
 import com.example.ecommerceapp.R
 import com.example.ecommerceapp.base.BaseFragment
 import com.example.ecommerceapp.databinding.FragmentProductDetailBinding
+import com.example.ecommerceapp.utils.openToast
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -21,6 +22,7 @@ class ProductDetailFragment :
         super.onViewCreated(view, savedInstanceState)
         viewModel.setProduct(args.product)
         collectState()
+        binding.lifecycleOwner = viewLifecycleOwner
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.product.collect { product ->
                 binding.product = product
@@ -34,13 +36,17 @@ class ProductDetailFragment :
         }
     }
 
+    override fun setupToolbar() {
+        configureToolbar(args.product.name,true)
+    }
+
     private fun collectState() {
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
                 when (state) {
                     is ProductDetailUiState.Error -> {
                         hideLoading()
-                        showAppDialog("Hata", state.message)
+                        showAppDialog(getString(R.string.error_text), state.message)
                     }
 
                     ProductDetailUiState.Loading -> {
@@ -49,20 +55,17 @@ class ProductDetailFragment :
 
                     is ProductDetailUiState.AddedFavorite -> {
                         hideLoading()
-                        Toast.makeText(requireContext(), "Favoriye eklendi", Toast.LENGTH_SHORT)
-                            .show()
+                        requireContext().openToast(getString(R.string.added_to_favorites), Toast.LENGTH_SHORT)
                     }
 
                     ProductDetailUiState.AddedBasket -> {
                         hideLoading()
-                        Toast.makeText(requireContext(), "Sepete eklendi", Toast.LENGTH_SHORT)
-                            .show()
+                        requireContext().openToast(getString(R.string.added_to_basket), Toast.LENGTH_SHORT)
                     }
 
                     ProductDetailUiState.RemoveFavorite -> {
                         hideLoading()
-                        Toast.makeText(requireContext(), "Favoriden kaldırıldı", Toast.LENGTH_SHORT)
-                            .show()
+                        requireContext().openToast(getString(R.string.removed_favorites), Toast.LENGTH_SHORT)
                     }
 
                     ProductDetailUiState.Empty -> Unit

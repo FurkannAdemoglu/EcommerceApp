@@ -16,33 +16,64 @@ import com.example.ecommerceapp.presentation.ui.product.list.adapter.ProductList
 import com.example.ecommerceapp.presentation.ui.product.list.adapter.click.OnClicksProduct
 import com.example.ecommerceapp.presentation.ui.product.list.adapter.viewitem.ProductListViewItem
 import com.example.ecommerceapp.presentation.ui.product.list.dialog.FilterDialogFragment
+import com.example.ecommerceapp.utils.isConnected
+import com.example.ecommerceapp.utils.openToast
 import com.example.netflixcloneapp.utils.BottomNavigationAnnotation
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 @BottomNavigationAnnotation
 class ProductListFragment :
     BaseFragment<FragmentProductListBinding>(R.layout.fragment_product_list) {
+
     private val viewModel: ProductListViewModel by viewModels()
     private val productListAdapter by lazy { ProductListAdapter() }
-    var selectedBrands = emptyList<String>()
-    var selectedModels = emptyList<String>()
-    var selectedSort: SortBy? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         collectState()
         setAdapter()
         adapterOnClicks()
-        binding.edTxtSearch.addTextChangedListener { text->
+        binding.edTxtSearch.addTextChangedListener { text ->
             viewModel.filterProducts(
-                selectedBrands = selectedBrands,
-                selectedModels = selectedModels,
+                selectedBrands = viewModel.selectedBrands,
+                selectedModels = viewModel.selectedModels,
                 searchQuery = text.toString(),
-                sortBy = selectedSort
+                sortBy = viewModel.selectedSort
             )
         }
         filterDialog()
+        checkInternetAndLoad()
+    }
+
+    private fun checkInternetAndLoad() {
+        if (requireContext().isConnected()) {
+            viewModel.getProductList()
+        } else {
+            showNoInternetDialogLoop()
+        }
+    }
+
+    private fun showNoInternetDialogLoop() {
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("İnternet Bağlantısı Yok")
+            .setMessage("İnternet açılınca ürünler tekrar yüklenecek.")
+            .setCancelable(false)
+            .setPositiveButton("Tamam") { dialogInterface, _ ->
+                dialogInterface.dismiss()
+                lifecycleScope.launch {
+                    if (!requireContext().isConnected()) {
+                        delay(500)
+                        showNoInternetDialogLoop()
+                    } else {
+                        viewModel.getProductList()
+                    }
+                }
+            }.create()
+        dialog.show()
     }
 
     private fun collectState() {
@@ -50,42 +81,33 @@ class ProductListFragment :
             viewModel.uiState.collect { state ->
                 when (state) {
                     is ProductListUiState.Error -> {
-                        showAppDialog("Hata", state.message)
+                        hideLoading()
+                        showAppDialog(getString(R.string.error_text), state.message)
                     }
-
-                    ProductListUiState.Loading -> {
-                        showLoading()
-                    }
-
+                    ProductListUiState.Loading -> showLoading()
                     is ProductListUiState.Success -> {
                         hideLoading()
                         productListAdapter.setProductListData(state.productList ?: emptyList())
-
                     }
-
                     is ProductListUiState.AddedFavorite -> {
                         hideLoading()
-                        Toast.makeText(requireContext(), "Favoriye eklendi", Toast.LENGTH_SHORT)
-                            .show()
+                        requireContext().openToast(getString(R.string.added_to_favorites), Toast.LENGTH_SHORT)
                     }
-
                     ProductListUiState.AddedBasket -> {
                         hideLoading()
-                        Toast.makeText(requireContext(), "Sepete eklendi", Toast.LENGTH_SHORT)
-                            .show()
+                        requireContext().openToast(getString(R.string.added_to_basket), Toast.LENGTH_SHORT)
                     }
-
                     ProductListUiState.RemoveFavorite -> {
                         hideLoading()
-                        Toast.makeText(requireContext(), "Favoriden kaldırıldı", Toast.LENGTH_SHORT)
-                            .show()
+                        requireContext().openToast(getString(R.string.removed_favorites), Toast.LENGTH_SHORT)
                     }
+                    ProductListUiState.Empty -> Unit
                 }
             }
         }
     }
 
-    private fun filterDialog(){
+    private fun filterDialog() {
         binding.txtSelectFilter.setOnClickListener {
             val allProducts = viewModel.fullProductList
             val brandList = allProducts
@@ -95,23 +117,22 @@ class ProductListFragment :
                 .mapNotNull { (it as? ProductListViewItem.ItemProductListViewItem)?.product?.model }
                 .distinct()
 
-
             FilterDialogFragment(
                 brandList = brandList,
                 modelList = modelList,
-                selectedBrands = selectedBrands,
-                selectedModels = selectedModels,
-                selectedSort = selectedSort
+                selectedBrands = viewModel.selectedBrands,
+                selectedModels = viewModel.selectedModels,
+                selectedSort = viewModel.selectedSort
             ) { brands, models, sort ->
-                selectedBrands = brands
-                selectedModels = models
-                selectedSort = sort
+                viewModel.selectedBrands = brands
+                viewModel.selectedModels = models
+                viewModel.selectedSort = sort
 
                 viewModel.filterProducts(
-                    selectedBrands = selectedBrands,
-                    selectedModels = selectedModels,
+                    selectedBrands = viewModel.selectedBrands,
+                    selectedModels = viewModel.selectedModels,
                     searchQuery = binding.edTxtSearch.text.toString(),
-                    sortBy = selectedSort
+                    sortBy = viewModel.selectedSort
                 )
             }.show(parentFragmentManager, "filterDialog")
         }
@@ -126,7 +147,7 @@ class ProductListFragment :
                     val layoutManager = recyclerView.layoutManager as GridLayoutManager
                     val lastVisible = layoutManager.findLastVisibleItemPosition()
                     if (lastVisible >= productListAdapter.itemCount - 1) {
-                        viewModel.loadNextPage() // ViewModel’e yeni sayfayı yüklemesini söyle
+                        viewModel.loadNextPage()
                     }
                 }
             })
@@ -136,23 +157,24 @@ class ProductListFragment :
     private fun adapterOnClicks() {
         productListAdapter.onClick = { onClick ->
             when (onClick) {
-                is OnClicksProduct.OnClickAddToCart -> {
-                    viewModel.addToCart(onClick.product)
-                }
-
+                is OnClicksProduct.OnClickAddToCart -> viewModel.addToCart(onClick.product)
                 is OnClicksProduct.OnClickAddToFavorite -> {
                     viewModel.toggleFavorite(onClick.isFavorite, onClick.id)
                     productListAdapter.updateItem(onClick.position, onClick.isFavorite)
                 }
-
-                is OnClicksProduct.OnClickRoot -> {
-                    findNavController().navigate(
-                        ProductListFragmentDirections.actionProductListFragmentToProductDetailFragment(
-                            onClick.product
-                        )
-                    )
-                }
+                is OnClicksProduct.OnClickRoot -> findNavController().navigate(
+                    ProductListFragmentDirections.actionProductListFragmentToProductDetailFragment(onClick.product)
+                )
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewModel.dispose()
+    }
+
+    override fun setupToolbar() {
+        configureToolbar(getString(R.string.e_market), false)
     }
 }

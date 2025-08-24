@@ -119,4 +119,8 @@ class FavoritesFragment:BaseFragment<FragmentFavoritesBinding>(R.layout.fragment
         super.onDestroyView()
         viewModel.dispose()
     }
+
+    override fun setupToolbar() {
+        configureToolbar(getString(R.string.e_market),false)
+    }
 }

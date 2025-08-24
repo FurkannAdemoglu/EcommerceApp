@@ -20,8 +20,7 @@ open class BaseViewModel(
             getBasketProductUseCase.invoke().collect { response ->
                 when (response) {
                     is Resource.Success -> {
-                        val totalCount = response.data?.sumOf { it.quantity } ?: 0
-                        _cartItemCount.value = totalCount
+                        _cartItemCount.value = response.data?.size?:0
                     }
 
                     else -> Unit

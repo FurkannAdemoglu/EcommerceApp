@@ -7,9 +7,13 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.example.ecommerceapp.R
+import com.google.android.material.appbar.MaterialToolbar
 
 
 abstract class BaseFragment<DB : ViewDataBinding>(
@@ -28,6 +32,29 @@ abstract class BaseFragment<DB : ViewDataBinding>(
         _binding = DataBindingUtil.inflate(inflater, layoutResId, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupToolbar()
+    }
+
+    protected fun configureToolbar(title: String, showBack: Boolean = false) {
+        val toolbar = requireActivity().findViewById<MaterialToolbar>(R.id.toolbar)
+        toolbar.title = title
+
+        val navController = findNavController()
+        if (showBack) {
+            toolbar.navigationIcon = ContextCompat.getDrawable(
+                requireContext(),
+                R.drawable.ic_arrow_back
+            )
+            toolbar.setNavigationOnClickListener {
+                navController.popBackStack()
+            }
+        } else {
+            toolbar.navigationIcon = null
+        }
     }
 
     override fun onDestroyView() {
@@ -69,4 +96,5 @@ abstract class BaseFragment<DB : ViewDataBinding>(
     fun hideLoading() {
         progressDialog?.dismiss()
     }
+    abstract fun setupToolbar()
 }

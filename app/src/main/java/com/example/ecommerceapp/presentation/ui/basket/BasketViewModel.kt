@@ -9,6 +9,7 @@ import com.example.ecommerceapp.domain.usecase.product.GetBasketProductUseCase
 import com.example.ecommerceapp.domain.usecase.product.RemoveFromBasketUseCase
 import com.example.ecommerceapp.presentation.ui.basket.adapter.viewitem.BasketListViewItem
 import com.example.ecommerceapp.utils.Resource
+import com.example.ecommerceapp.utils.totalPriceFormatted
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -50,7 +51,7 @@ class BasketViewModel @Inject constructor(
                                 productList.add(BasketListViewItem.ItemProductBasketListViewItem(product))
                             }
                             cartList.addAll(response.data)
-                            _uiState.value = BasketListUiState.Success(productList)
+                            _uiState.value = BasketListUiState.Success(productList,response.data.totalPriceFormatted().toString())
                         }
                     }
 
@@ -67,11 +68,11 @@ class BasketViewModel @Inject constructor(
             addToBasketProductUseCase(cartProduct).collect { response ->
                 when (response) {
                     is Resource.Error -> {
-
+                        _uiState.value = BasketListUiState.Error(response.message)
                     }
 
                     Resource.Loading -> {
-
+                        _uiState.value = BasketListUiState.Loading
                     }
 
                     is Resource.Success<*> -> {
@@ -87,11 +88,11 @@ class BasketViewModel @Inject constructor(
             removeToBasketProductUseCase(cartProduct).collect { response ->
                 when (response) {
                     is Resource.Error -> {
-
+                        _uiState.value = BasketListUiState.Error(response.message)
                     }
 
                     Resource.Loading -> {
-
+                        _uiState.value = BasketListUiState.Loading
                     }
 
                     is Resource.Success<*> -> {
@@ -128,7 +129,7 @@ class BasketViewModel @Inject constructor(
 
 sealed interface BasketListUiState {
     data object Loading : BasketListUiState
-    data class Success(val cartProductList: List<BasketListViewItem>?) : BasketListUiState
+    data class Success(val cartProductList: List<BasketListViewItem>?,val totalPrice:String) : BasketListUiState
     data object EmptySuccess : BasketListUiState
     data object DeleteSuccess: BasketListUiState
     data class Error(val message: String) : BasketListUiState

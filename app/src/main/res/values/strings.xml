@@ -5,4 +5,15 @@
 
     <string name="empty_favorite_description">Favorileriniz Boş Görünüyor</string>
     <string name="empty_favorite_button">Keşfetmeye başla</string>
+
+    <!--Toast strings-->
+    <string name="added_to_favorites">Favoriye Eklendi</string>
+    <string name="added_to_basket">Sepete Eklendi</string>
+    <string name="removed_favorites">Favoriden Kaldırıldı</string>
+
+    <!-- Error-->
+    <string name="error_text">Hata</string>
+
+    <!--Header Text-->
+    <string name="e_market">E-Market</string>
 </resources>

@@ -11,10 +11,9 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:titleTextColor="@android:color/white"
-            app:title="" />
+            android:layout_height="wrap_content"
+            android:background="@color/blue_21"
+            android:titleTextColor="@android:color/white" />
 
 
         <androidx.fragment.app.FragmentContainerView

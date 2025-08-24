@@ -1,6 +1,5 @@
 package com.example.ecommerceapp.domain.usecase.product
 
-import com.example.ecommerceapp.base.BaseUseCaseNoParameter
 import com.example.ecommerceapp.base.BaseUseCaseNoParameterFlow
 import com.example.ecommerceapp.data.mapper.ProductMapper
 import com.example.ecommerceapp.domain.model.Product

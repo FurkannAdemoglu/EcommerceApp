@@ -33,14 +33,14 @@ class ProductListViewModel @Inject constructor(
     val uiState: StateFlow<ProductListUiState> = _uiState.asStateFlow()
     val fullProductList = mutableListOf<ProductListViewItem>()
     private var filteredProductList = mutableListOf<ProductListViewItem>()
+    var selectedBrands = emptyList<String>()
+    var selectedModels = emptyList<String>()
+    var selectedSort: SortBy? = null
     private val pageSize = 4
     private var currentIndex = 0
 
-    init {
-        getProductList()
-    }
 
-    private fun getProductList() {
+    fun getProductList() {
         viewModelScope.launch(Dispatchers.IO) {
             getProductsUseCase.invoke().collect { response ->
                 when (response) {
@@ -172,6 +172,10 @@ class ProductListViewModel @Inject constructor(
         }
     }
 
+    fun dispose(){
+        _uiState.value = ProductListUiState.Empty
+    }
+
 }
 
 sealed interface ProductListUiState {
@@ -179,6 +183,7 @@ sealed interface ProductListUiState {
     data class Success(val productList: List<ProductListViewItem>?) : ProductListUiState
     data object AddedFavorite:ProductListUiState
     data object RemoveFavorite:ProductListUiState
+    data object Empty:ProductListUiState
     data object AddedBasket:ProductListUiState
     data class Error(val message: String) : ProductListUiState
 }
