@@ -44,6 +44,8 @@ class ProductListViewModel @Inject constructor(
     var selectedBrands = emptyList<String>()
     var selectedModels = emptyList<String>()
     var selectedSort: SortBy? = null
+    var lastSearchQuery: String = ""
+    private var isFavoriteJob=false
     private val pageSize = 4
     private var currentIndex = 0
 
@@ -60,13 +62,17 @@ class ProductListViewModel @Inject constructor(
                 when (response) {
                     is Resource.Loading -> _uiState.value = ProductListUiState.Loading
                     is Resource.Success -> {
-                        fullProductList.clear()
-                        response.data?.map { product ->
-                            fullProductList.add(ProductListViewItem.ItemProductListViewItem(product))
+                        if (!isFavoriteJob){
+                            fullProductList.clear()
+                            response.data?.map { product ->
+                                fullProductList.add(ProductListViewItem.ItemProductListViewItem(product))
+                            }
+                            currentIndex = 0
+                            filteredProductList = fullProductList.toMutableList()
+                            loadNextPage(reset = true)
+                        }else{
+                            isFavoriteJob = false
                         }
-                        currentIndex = 0
-                        filteredProductList = fullProductList.toMutableList()
-                        loadNextPage(reset = true)
                     }
                     is Resource.Error -> _uiState.value = ProductListUiState.Error(response.message)
                 }
@@ -75,6 +81,7 @@ class ProductListViewModel @Inject constructor(
     }
 
     fun toggleFavorite(isFavorite:Boolean,id: String) {
+        isFavoriteJob = true
         viewModelScope.launch {
             if (isFavorite) {
                 removeFavoriteUseCase(FavoriteProduct(id)).collect{response->

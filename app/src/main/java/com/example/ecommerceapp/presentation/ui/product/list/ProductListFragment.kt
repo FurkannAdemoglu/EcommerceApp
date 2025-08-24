@@ -38,12 +38,16 @@ class ProductListFragment :
         setAdapter()
         adapterOnClicks()
         binding.edTxtSearch.addTextChangedListener { text ->
-            viewModel.filterProducts(
-                selectedBrands = viewModel.selectedBrands,
-                selectedModels = viewModel.selectedModels,
-                searchQuery = text.toString(),
-                sortBy = viewModel.selectedSort
-            )
+            val query = text.toString()
+            if (query!=viewModel.lastSearchQuery){
+                viewModel.lastSearchQuery = query
+                viewModel.filterProducts(
+                    selectedBrands = viewModel.selectedBrands,
+                    selectedModels = viewModel.selectedModels,
+                    searchQuery = text.toString(),
+                    sortBy = viewModel.selectedSort
+                )
+            }
         }
         filterDialog()
         checkInternetAndLoad()

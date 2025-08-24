@@ -32,6 +32,8 @@ class FavoriteViewModel @Inject constructor(
     val uiState: StateFlow<FavoriteListUiState> = _uiState.asStateFlow()
     val productList = mutableListOf<ProductListViewItem>()
 
+    private var isFavoriteJob = false
+
 
     fun getProductList() {
         viewModelScope.launch(ioDispatcher) {
@@ -41,15 +43,20 @@ class FavoriteViewModel @Inject constructor(
                         _uiState.value = FavoriteListUiState.Loading
                     }
                     is Resource.Success -> {
-                        productList.clear()
-                        if (response.data.isNullOrEmpty()) {
-                            _uiState.value = FavoriteListUiState.EmptyFavorite
-                        } else {
-                            response.data.map { product ->
-                                productList.add(ProductListViewItem.ItemProductListViewItem(product))
+                        if (!isFavoriteJob){
+                            productList.clear()
+                            if (response.data.isNullOrEmpty()) {
+                                _uiState.value = FavoriteListUiState.EmptyFavorite
+                            } else {
+                                response.data.map { product ->
+                                    productList.add(ProductListViewItem.ItemProductListViewItem(product))
+                                }
+                                _uiState.value = FavoriteListUiState.Success(productList)
                             }
-                            _uiState.value = FavoriteListUiState.Success(productList)
+                        }else{
+                            isFavoriteJob = false
                         }
+
                     }
 
                     is Resource.Error -> {
@@ -90,6 +97,7 @@ class FavoriteViewModel @Inject constructor(
     }
 
     fun removeFromFavorite(id:String){
+        isFavoriteJob = true
         viewModelScope.launch {
             removeFavoriteUseCase.invoke(FavoriteProduct(id)).collect{response->
                 when (response) {
