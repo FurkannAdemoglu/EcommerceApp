@@ -20,22 +20,27 @@ class ProductDetailFragment :
     private val viewModel: ProductDetailViewModel by viewModels()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.setProduct(args.product)
+        bindings()
         collectState()
-        binding.lifecycleOwner = viewLifecycleOwner
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.product.collect { product ->
-                binding.product = product
-            }
-        }
-        binding.txtAddToCart.setOnClickListener {
-            viewModel.addToCart()
-        }
-        binding.imgFavorite.setOnClickListener {
-            viewModel.toggleFavorite()
+        clickListeners()
+    }
+
+    private fun bindings(){
+        binding.apply {
+            product = args.product
+            isFavorite = args.product.isFavorite
+            lifecycleOwner = viewLifecycleOwner
         }
     }
 
+    private fun clickListeners(){
+        binding.txtAddToCart.setOnClickListener {
+            viewModel.addToCart(args.product)
+        }
+        binding.imgFavorite.setOnClickListener {
+            viewModel.toggleFavorite(args.product)
+        }
+    }
     override fun setupToolbar() {
         configureToolbar(args.product.name,true)
     }
@@ -55,6 +60,7 @@ class ProductDetailFragment :
 
                     is ProductDetailUiState.AddedFavorite -> {
                         hideLoading()
+                        binding.isFavorite = true
                         requireContext().openToast(getString(R.string.added_to_favorites), Toast.LENGTH_SHORT)
                     }
 
@@ -65,6 +71,7 @@ class ProductDetailFragment :
 
                     ProductDetailUiState.RemoveFavorite -> {
                         hideLoading()
+                        binding.isFavorite = false
                         requireContext().openToast(getString(R.string.removed_favorites), Toast.LENGTH_SHORT)
                     }
 

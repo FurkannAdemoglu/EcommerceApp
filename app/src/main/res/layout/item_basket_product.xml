@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:tools="http://schemas.android.com/tools">
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -32,45 +33,47 @@
             <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:textSize="15sp"
                 android:textColor="@color/black"
-                android:text="@{cartProduct.productTotalPrice}" />
+                android:textSize="15sp"
+                app:priceWithCurrency="@{cartProduct.productTotalPrice}" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:orientation="horizontal"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/txtMinus"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:background="@color/gray_ec"
+                android:gravity="center"
+                android:paddingHorizontal="30dp"
                 android:paddingVertical="20dp"
                 android:text="-"
-               android:gravity="center"
-                android:textSize="15sp"
-                android:paddingHorizontal="30dp" />
+                android:textSize="15sp" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:background="@color/blue_21"
+                android:gravity="center"
                 android:paddingHorizontal="30dp"
                 android:text="@{cartProduct.quantityString}"
-                android:gravity="center"
-                android:textSize="15sp"
                 android:textColor="@color/white"
+                android:textSize="15sp"
                 tools:text="2" />
+
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/txtPlus"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:background="@color/gray_ec"
                 android:gravity="center"
+                android:paddingHorizontal="30dp"
                 android:text="+"
-                android:textSize="20sp"
-                android:paddingHorizontal="30dp"/>
+                android:textSize="20sp" />
 
         </LinearLayout>
 

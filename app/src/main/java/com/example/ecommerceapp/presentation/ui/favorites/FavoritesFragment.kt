@@ -15,6 +15,7 @@ import com.example.ecommerceapp.presentation.ui.product.list.adapter.ProductList
 import com.example.ecommerceapp.presentation.ui.product.list.adapter.click.OnClicksProduct
 import com.example.ecommerceapp.presentation.ui.product.list.adapter.viewitem.ProductListViewItem
 import com.example.ecommerceapp.utils.EmptyView
+import com.example.ecommerceapp.utils.openToast
 import com.example.netflixcloneapp.utils.BottomNavigationAnnotation
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -30,6 +31,7 @@ class FavoritesFragment:BaseFragment<FragmentFavoritesBinding>(R.layout.fragment
         collectState()
         setAdapter()
         adapterOnClicks()
+        viewModel.getProductList()
 
     }
     private fun setAdapter() {
@@ -58,14 +60,12 @@ class FavoritesFragment:BaseFragment<FragmentFavoritesBinding>(R.layout.fragment
 
                     FavoriteListUiState.AddedBasket -> {
                         hideLoading()
-                        Toast.makeText(requireContext(), "Sepete eklendi", Toast.LENGTH_SHORT)
-                            .show()
+                        requireContext().openToast(getString(R.string.added_to_basket), Toast.LENGTH_SHORT)
                     }
 
                     FavoriteListUiState.RemoveFavorite -> {
                         hideLoading()
-                        Toast.makeText(requireContext(), "Favoriden kaldırıldı", Toast.LENGTH_SHORT)
-                            .show()
+                        requireContext().openToast(getString(R.string.removed_favorites), Toast.LENGTH_SHORT)
                     }
 
                     FavoriteListUiState.EmptyFavorite ->{

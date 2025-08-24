@@ -30,11 +30,8 @@ class FavoriteViewModel @Inject constructor(
     val uiState: StateFlow<FavoriteListUiState> = _uiState.asStateFlow()
     val productList = mutableListOf<ProductListViewItem>()
 
-    init {
-        getProductList()
-    }
 
-    private fun getProductList() {
+    fun getProductList() {
         viewModelScope.launch(Dispatchers.IO) {
             getFavoriteUseCase.invoke().collect { response ->
                 when (response) {

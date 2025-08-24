@@ -72,7 +72,7 @@ class NetworkModule {
 
         val client = okHttpClientBuilder.build()
         return builder.client(client)
-            .baseUrl("https://5fc9346b2af77700165ae514.mockapi.io/")
+            .baseUrl(BuildConfig.BASE_URL)
             .client(client)
             .addConverterFactory(converterFactory)
             .build()

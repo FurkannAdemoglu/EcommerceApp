@@ -16,4 +16,16 @@
 
     <!--Header Text-->
     <string name="e_market">E-Market</string>
+
+    <!-- Product List-->
+    <string name="add_to_cart">Add To Cart</string>
+    <string name="filters_text">Filters</string>
+    <string name="select_filter_text">Select Filter</string>
+
+    <!--Product Detail-->
+    <string name="price_text">Price:</string>
+
+    <!-- Basket Screen-->
+    <string name="complete_text">Complete</string>
+    <string name="total_text">Total</string>
 </resources>

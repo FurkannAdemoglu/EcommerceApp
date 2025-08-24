@@ -158,7 +158,6 @@ class ProductListViewModel @Inject constructor(
                 } else false
             }.toMutableList()
 
-            // Sıralama
             filteredProductList = when(sortBy) {
                 SortBy.PRICE_ASC -> filteredProductList.sortedBy { (it as ProductListViewItem.ItemProductListViewItem).product.price.toDouble() }.toMutableList()
                 SortBy.PRICE_DESC -> filteredProductList.sortedByDescending { (it as ProductListViewItem.ItemProductListViewItem).product.price.toDouble() }.toMutableList()

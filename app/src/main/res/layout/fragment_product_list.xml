@@ -31,7 +31,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
                 android:padding="10dp"
-                android:text="Filters:"
+                android:text="@string/filters_text"
                 android:textSize="13sp" />
 
             <androidx.appcompat.widget.AppCompatTextView
@@ -41,7 +41,7 @@
                 android:layout_weight="0.5"
                 android:gravity="center"
                 android:padding="10dp"
-                android:text="Select Filter"
+                android:text="@string/select_filter_text"
                 android:textSize="13sp" />
         </LinearLayout>
 
