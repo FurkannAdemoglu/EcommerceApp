@@ -2,17 +2,19 @@ package com.example.ecommerceapp.presentation.ui.product.list
 
 import androidx.lifecycle.viewModelScope
 import com.example.ecommerceapp.base.BaseViewModel
+import com.example.ecommerceapp.di.IoDispatcher
 import com.example.ecommerceapp.domain.model.CartProduct
 import com.example.ecommerceapp.domain.model.FavoriteProduct
 import com.example.ecommerceapp.domain.model.Product
-import com.example.ecommerceapp.domain.usecase.product.AddFavoriteProductUseCase
-import com.example.ecommerceapp.domain.usecase.product.AddToBasketProductUseCase
-import com.example.ecommerceapp.domain.usecase.product.GetBasketProductUseCase
+import com.example.ecommerceapp.domain.usecase.favorite.AddFavoriteProductUseCase
+import com.example.ecommerceapp.domain.usecase.basket.AddToBasketProductUseCase
+import com.example.ecommerceapp.domain.usecase.basket.GetBasketProductUseCase
 import com.example.ecommerceapp.domain.usecase.product.GetProductsUseCase
-import com.example.ecommerceapp.domain.usecase.product.RemoveFavoriteUseCase
+import com.example.ecommerceapp.domain.usecase.favorite.RemoveFavoriteUseCase
 import com.example.ecommerceapp.presentation.ui.product.list.adapter.viewitem.ProductListViewItem
 import com.example.ecommerceapp.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +29,8 @@ class ProductListViewModel @Inject constructor(
     private val addFavoriteProductUseCase: AddFavoriteProductUseCase,
     private val removeFavoriteUseCase: RemoveFavoriteUseCase,
     private val addToBasketProductUseCase: AddToBasketProductUseCase,
-    private val getBasketProductUseCase: GetBasketProductUseCase
+    private val getBasketProductUseCase: GetBasketProductUseCase,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : BaseViewModel(getBasketProductUseCase) {
     private val _uiState = MutableStateFlow<ProductListUiState>(ProductListUiState.Loading)
     val uiState: StateFlow<ProductListUiState> = _uiState.asStateFlow()
@@ -41,7 +44,7 @@ class ProductListViewModel @Inject constructor(
 
 
     fun getProductList() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             getProductsUseCase.invoke().collect { response ->
                 when (response) {
                     is Resource.Loading -> _uiState.value = ProductListUiState.Loading

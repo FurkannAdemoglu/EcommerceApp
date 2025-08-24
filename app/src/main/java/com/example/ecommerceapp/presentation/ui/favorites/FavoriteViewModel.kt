@@ -2,17 +2,18 @@ package com.example.ecommerceapp.presentation.ui.favorites
 
 import androidx.lifecycle.viewModelScope
 import com.example.ecommerceapp.base.BaseViewModel
+import com.example.ecommerceapp.di.IoDispatcher
 import com.example.ecommerceapp.domain.model.CartProduct
 import com.example.ecommerceapp.domain.model.FavoriteProduct
 import com.example.ecommerceapp.domain.model.Product
-import com.example.ecommerceapp.domain.usecase.product.AddToBasketProductUseCase
-import com.example.ecommerceapp.domain.usecase.product.GetBasketProductUseCase
-import com.example.ecommerceapp.domain.usecase.product.GetFavoriteUseCase
-import com.example.ecommerceapp.domain.usecase.product.RemoveFavoriteUseCase
+import com.example.ecommerceapp.domain.usecase.basket.AddToBasketProductUseCase
+import com.example.ecommerceapp.domain.usecase.basket.GetBasketProductUseCase
+import com.example.ecommerceapp.domain.usecase.favorite.GetFavoriteUseCase
+import com.example.ecommerceapp.domain.usecase.favorite.RemoveFavoriteUseCase
 import com.example.ecommerceapp.presentation.ui.product.list.adapter.viewitem.ProductListViewItem
 import com.example.ecommerceapp.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +25,8 @@ class FavoriteViewModel @Inject constructor(
     private val getFavoriteUseCase: GetFavoriteUseCase,
     private val removeFavoriteUseCase: RemoveFavoriteUseCase,
     private val addToBasketProductUseCase: AddToBasketProductUseCase,
-    private val getBasketProductUseCase: GetBasketProductUseCase
+    private val getBasketProductUseCase: GetBasketProductUseCase,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : BaseViewModel(getBasketProductUseCase) {
     private val _uiState = MutableStateFlow<FavoriteListUiState>(FavoriteListUiState.Loading)
     val uiState: StateFlow<FavoriteListUiState> = _uiState.asStateFlow()
@@ -32,7 +34,7 @@ class FavoriteViewModel @Inject constructor(
 
 
     fun getProductList() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             getFavoriteUseCase.invoke().collect { response ->
                 when (response) {
                     is Resource.Loading -> {

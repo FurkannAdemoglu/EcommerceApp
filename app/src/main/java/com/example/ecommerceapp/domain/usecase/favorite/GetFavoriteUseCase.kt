@@ -1,4 +1,4 @@
-package com.example.ecommerceapp.domain.usecase.product
+package com.example.ecommerceapp.domain.usecase.favorite
 
 
 import com.example.ecommerceapp.base.BaseUseCaseNoParameterFlow

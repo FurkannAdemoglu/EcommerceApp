@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -14,10 +13,8 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navOptions
 import com.example.ecommerceapp.base.BaseActivity
 import com.example.ecommerceapp.databinding.ActivityMainBinding
-import com.example.ecommerceapp.utils.isConnected
 import com.example.netflixcloneapp.utils.BottomNavigationAnnotation
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -73,19 +70,6 @@ class MainActivity : BaseActivity() {
         viewModel.bottomState.observe(this, ::updateBottomNavigation)
     }
 
-    private fun showNoInternetDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("İnternet Bağlantısı Yok")
-            .setMessage("İnternet bağlantısı yok. Tekrar denemek için Tamam'a basın.")
-            .setCancelable(false)
-            .setPositiveButton("Tamam") { dialog, _ ->
-                dialog.dismiss()
-                lifecycleScope.launch {
-                    delay(200)
-
-                }
-            }.show()
-    }
 
     private fun getMenuItemIndex(itemId: Int): Int? {
         val menu = binding.bottomNav.menu

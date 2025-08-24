@@ -1,4 +1,4 @@
-package com.example.ecommerceapp.domain.usecase.product
+package com.example.ecommerceapp.domain.usecase.basket
 
 import com.example.ecommerceapp.base.BaseUseCase
 import com.example.ecommerceapp.domain.model.CartProduct

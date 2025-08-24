@@ -44,7 +44,7 @@ class FavoritesFragment:BaseFragment<FragmentFavoritesBinding>(R.layout.fragment
             viewModel.uiState.collect { state ->
                 when (state) {
                     is FavoriteListUiState.Error -> {
-                        showAppDialog("Hata", state.message)
+                        showAppDialog(getString(R.string.error_text), state.message)
                     }
 
                     FavoriteListUiState.Loading -> {

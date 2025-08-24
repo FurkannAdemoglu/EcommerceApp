@@ -3,10 +3,10 @@ package com.example.ecommerceapp.presentation.ui.basket
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ecommerceapp.domain.model.CartProduct
-import com.example.ecommerceapp.domain.usecase.product.AddToBasketProductUseCase
-import com.example.ecommerceapp.domain.usecase.product.DeleteAllBasketUseCase
-import com.example.ecommerceapp.domain.usecase.product.GetBasketProductUseCase
-import com.example.ecommerceapp.domain.usecase.product.RemoveFromBasketUseCase
+import com.example.ecommerceapp.domain.usecase.basket.AddToBasketProductUseCase
+import com.example.ecommerceapp.domain.usecase.basket.DeleteAllBasketUseCase
+import com.example.ecommerceapp.domain.usecase.basket.GetBasketProductUseCase
+import com.example.ecommerceapp.domain.usecase.basket.RemoveFromBasketUseCase
 import com.example.ecommerceapp.presentation.ui.basket.adapter.viewitem.BasketListViewItem
 import com.example.ecommerceapp.utils.Resource
 import com.example.ecommerceapp.utils.totalPriceFormatted

@@ -5,10 +5,10 @@ import com.example.ecommerceapp.base.BaseViewModel
 import com.example.ecommerceapp.domain.model.CartProduct
 import com.example.ecommerceapp.domain.model.FavoriteProduct
 import com.example.ecommerceapp.domain.model.Product
-import com.example.ecommerceapp.domain.usecase.product.AddFavoriteProductUseCase
-import com.example.ecommerceapp.domain.usecase.product.AddToBasketProductUseCase
-import com.example.ecommerceapp.domain.usecase.product.GetBasketProductUseCase
-import com.example.ecommerceapp.domain.usecase.product.RemoveFavoriteUseCase
+import com.example.ecommerceapp.domain.usecase.favorite.AddFavoriteProductUseCase
+import com.example.ecommerceapp.domain.usecase.basket.AddToBasketProductUseCase
+import com.example.ecommerceapp.domain.usecase.basket.GetBasketProductUseCase
+import com.example.ecommerceapp.domain.usecase.favorite.RemoveFavoriteUseCase
 import com.example.ecommerceapp.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,10 +28,9 @@ class ProductDetailViewModel @Inject constructor(
     val uiState: StateFlow<ProductDetailUiState> = _uiState.asStateFlow()
 
     fun toggleFavorite(product: Product) {
-        val current = product
         viewModelScope.launch {
-            if (current.isFavorite) {
-                removeFavoriteUseCase(FavoriteProduct(current.id)).collect{response->
+            if (product.isFavorite) {
+                removeFavoriteUseCase(FavoriteProduct(product.id)).collect{response->
                     when(response){
                         is Resource.Error -> {
                             _uiState.value = ProductDetailUiState.Error(response.message)
@@ -45,7 +44,7 @@ class ProductDetailViewModel @Inject constructor(
                     }
                 }
             } else {
-                addFavoriteProductUseCase(FavoriteProduct(current.id)).collect{response->
+                addFavoriteProductUseCase(FavoriteProduct(product.id)).collect{response->
                     when(response){
                         is Resource.Error -> {
                             _uiState.value = ProductDetailUiState.Error(response.message)
