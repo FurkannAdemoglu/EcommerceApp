@@ -1,16 +1,20 @@
 package com.example.ecommerceapp
 
+import android.graphics.Color
 import android.os.Bundle
-import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
-import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.navOptions
+import androidx.navigation.fragment.FragmentNavigator
+import androidx.navigation.ui.setupWithNavController
 import com.example.ecommerceapp.base.BaseActivity
 import com.example.ecommerceapp.databinding.ActivityMainBinding
 import com.example.netflixcloneapp.utils.BottomNavigationAnnotation
@@ -38,27 +42,25 @@ class MainActivity : BaseActivity() {
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment
         navController = navHostFragment.navController
 
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            if (destination is FragmentNavigator.Destination) {
-                onChangeDestination(destination)
-            }
-        }
+        binding.bottomNav.setupWithNavController(navController)
 
-        binding.bottomNav.setOnNavigationItemSelectedListener(::bottomMenuSelected)
-        binding.bottomNav.setOnNavigationItemReselectedListener(::bottomMenuReselected)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            val className = (destination as? FragmentNavigator.Destination)?.className
+            onChangeDestination(className)
+        }
     }
 
     private fun startAppFlows() {
         viewModel.loadCartItemCount()
         observeCartCount()
-        observeBottomNavigation()
     }
 
     private fun observeCartCount() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.cartItemCount.collect { count ->
-                    val badge = binding.bottomNav.getOrCreateBadge(R.id.nav_basket)
+                    val badge = binding.bottomNav.getOrCreateBadge(R.id.basketFragment)
                     badge.isVisible = count > 0
                     badge.number = count
                 }
@@ -66,66 +68,27 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun observeBottomNavigation() {
-        viewModel.bottomState.observe(this, ::updateBottomNavigation)
-    }
-
-
-    private fun getMenuItemIndex(itemId: Int): Int? {
-        val menu = binding.bottomNav.menu
-        for (i in 0 until menu.size()) {
-            if (itemId == menu.getItem(i).itemId) return i
+    private fun onChangeDestination(className: String?) {
+        if (className == null) {
+            binding.bottomNav.visibility = View.GONE
+            return
         }
-        return null
-    }
 
-    private fun updateBottomNavigation(annotation: BottomNavigationAnnotation) {
-        binding.bottomNav.visibility = View.VISIBLE
-        if (binding.bottomNav.selectedItemId != annotation.menuItemId) {
-            getMenuItemIndex(annotation.menuItemId)?.let {
-                binding.bottomNav.menu.getItem(it).isChecked = true
-            }
+        val kClass = runCatching { classLoader.loadClass(className) }.getOrNull()
+        if (kClass == null) {
+            binding.bottomNav.visibility = View.GONE
+            return
         }
-    }
 
-    private fun onChangeDestination(destination: FragmentNavigator.Destination) {
-        val annotations = classLoader.loadClass(destination.className).annotations
+        val annotations = kClass.annotations
         val bottomNavigationAnnotation =
             annotations.firstOrNull { BottomNavigationAnnotation::class.java.isAssignableFrom(it.javaClass) }
+
         if (bottomNavigationAnnotation != null) {
             viewModel.setBottomNavigationState(bottomNavigationAnnotation as BottomNavigationAnnotation)
+            binding.bottomNav.visibility = View.VISIBLE
         } else {
             binding.bottomNav.visibility = View.GONE
-        }
-    }
-
-    private fun bottomMenuSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.nav_home -> {
-                navController.navigate(R.id.productListFragment, null, navOptions {
-                    popUpTo(navController.graph.startDestinationId) { inclusive = false }
-                })
-            }
-
-            R.id.nav_basket -> {
-                navController.navigate(R.id.basketFragment, null, navOptions {
-                    popUpTo(navController.graph.startDestinationId) { inclusive = false }
-                })
-            }
-            R.id.nav_favorites -> {
-                navController.navigate(R.id.favoriteFragment, null, navOptions {
-                    popUpTo(navController.graph.startDestinationId) { inclusive = false }
-                })
-            }
-        }
-        return true
-    }
-
-    private fun bottomMenuReselected(item: MenuItem) {
-        when (item.itemId) {
-            R.id.nav_home -> navController.popBackStack(R.id.productListFragment, false)
-            R.id.nav_basket -> navController.popBackStack(R.id.basketFragment, false)
-            R.id.nav_favorites -> navController.popBackStack(R.id.favoriteFragment, false)
         }
     }
 }

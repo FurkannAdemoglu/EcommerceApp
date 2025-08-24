@@ -2,7 +2,6 @@
 agp = "8.9.0"
 kotlin = "2.0.21"
 coreKtx = "1.10.1"
-junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 appcompat = "1.6.1"
@@ -19,11 +18,15 @@ fragment = "1.6.2"
 navigation = "2.7.5"
 chucker = "4.0.0"
 core-splashscreen = "1.0.1"
-mockk = "1.13.3"
 turbine = "0.12.1"
 androidx-core-testing = "2.2.0"
 glide = "4.16.0"
-room = "2.6.2"
+room = "2.7.2"
+recyclerview = "1.3.1"
+junit = "5.8.2"
+mockk = "1.13.4"
+coroutinesTest = "1.6.4"
+coreTesting = "2.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -62,9 +65,16 @@ chucker-release = { group = "com.github.chuckerteam.chucker", name = "library-no
 core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "core-splashscreen" }
 
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "androidx-core-testing" }
+
+recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
+navigation-fragment = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigation" }
+navigation-ui = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }
+
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

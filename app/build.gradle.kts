@@ -95,17 +95,17 @@ dependencies {
     androidTestImplementation(libs.coroutines.test)
     implementation(libs.glide)
     kapt(libs.glide.compiler)
-    val room_version = "2.7.2"
-    implementation("androidx.room:room-runtime:$room_version")
-    kapt("androidx.room:room-compiler:$room_version")
-    implementation ("androidx.recyclerview:recyclerview:1.3.1")
-    implementation ("androidx.navigation:navigation-fragment-ktx:2.7.2")
-    implementation ("androidx.navigation:navigation-ui-ktx:2.7.2")
+    implementation(libs.room.runtime)
+    kapt(libs.room.compiler)
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
-    testImplementation("io.mockk:mockk:1.13.4")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
-    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    implementation(libs.recyclerview)
+    implementation(libs.navigation.fragment)
+    implementation(libs.navigation.ui)
+
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.mockk)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.core.testing)
 }
 kapt {
     correctErrorTypes = true

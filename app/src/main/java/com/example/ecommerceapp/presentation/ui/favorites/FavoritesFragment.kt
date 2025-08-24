@@ -69,6 +69,7 @@ class FavoritesFragment:BaseFragment<FragmentFavoritesBinding>(R.layout.fragment
                     }
 
                     FavoriteListUiState.EmptyFavorite ->{
+                        hideLoading()
                         binding.rcycFavoriteList.layoutManager = LinearLayoutManager(requireContext())
                         productListAdapter.setProductListData(
                             listOf(
