@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.ecommerceapp.R
 import com.example.ecommerceapp.base.BaseFragment
 import com.example.ecommerceapp.databinding.FragmentFavoritesBinding
+import com.example.ecommerceapp.presentation.ui.product.list.ProductListUiEvent
 import com.example.ecommerceapp.presentation.ui.product.list.adapter.ProductListAdapter
 import com.example.ecommerceapp.presentation.ui.product.list.adapter.click.OnClicksProduct
 import com.example.ecommerceapp.presentation.ui.product.list.adapter.viewitem.ProductListViewItem
@@ -50,7 +51,7 @@ class FavoritesFragment:BaseFragment<FragmentFavoritesBinding>(R.layout.fragment
         }
     }
     private fun collectState() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collect { state ->
                 when (state) {
                     is FavoriteListUiState.Error -> {
@@ -74,11 +75,6 @@ class FavoritesFragment:BaseFragment<FragmentFavoritesBinding>(R.layout.fragment
                         requireContext().openToast(getString(R.string.added_to_basket), Toast.LENGTH_SHORT)
                     }
 
-                    FavoriteListUiState.RemoveFavorite -> {
-                        hideLoading()
-                        requireContext().openToast(getString(R.string.removed_favorites), Toast.LENGTH_SHORT)
-                    }
-
                     FavoriteListUiState.EmptyFavorite ->{
                         hideLoading()
                         binding.rcycFavoriteList.layoutManager = LinearLayoutManager(requireContext())
@@ -97,6 +93,19 @@ class FavoritesFragment:BaseFragment<FragmentFavoritesBinding>(R.layout.fragment
                     }
 
                     FavoriteListUiState.Empty -> Unit
+                }
+            }
+        }
+        lifecycleScope.launch {
+            viewModel.uiEvent.collect { event ->
+                when (event) {
+                    FavoriteListUiEvent.RemovedFavorite ->{
+                        hideLoading()
+                        requireContext().openToast(
+                            getString(R.string.removed_favorites),
+                            Toast.LENGTH_SHORT
+                        )
+                    }
                 }
             }
         }

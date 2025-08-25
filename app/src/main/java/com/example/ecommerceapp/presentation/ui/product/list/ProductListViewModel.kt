@@ -62,7 +62,7 @@ class ProductListViewModel @Inject constructor(
                 when (response) {
                     is Resource.Loading -> _uiState.value = ProductListUiState.Loading
                     is Resource.Success -> {
-                        if (!isFavoriteJob){
+                        if (!isFavoriteJob && fullProductList.isEmpty()){
                             fullProductList.clear()
                             response.data?.map { product ->
                                 fullProductList.add(ProductListViewItem.ItemProductListViewItem(product))
@@ -114,7 +114,6 @@ class ProductListViewModel @Inject constructor(
     fun loadNextPage(reset: Boolean = false) {
         if (reset) currentIndex = 0
 
-        if (currentIndex >= filteredProductList.size) return
 
         val nextIndex = (currentIndex + pageSize).coerceAtMost(filteredProductList.size)
         val pageItems = filteredProductList.subList(currentIndex, nextIndex)

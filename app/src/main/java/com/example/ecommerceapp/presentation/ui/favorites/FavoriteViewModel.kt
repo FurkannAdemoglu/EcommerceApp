@@ -14,7 +14,9 @@ import com.example.ecommerceapp.presentation.ui.product.list.adapter.viewitem.Pr
 import com.example.ecommerceapp.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -30,6 +32,10 @@ class FavoriteViewModel @Inject constructor(
 ) : BaseViewModel(getBasketProductUseCase) {
     private val _uiState = MutableStateFlow<FavoriteListUiState>(FavoriteListUiState.Loading)
     val uiState: StateFlow<FavoriteListUiState> = _uiState.asStateFlow()
+
+    private val _uiEvent = MutableSharedFlow<FavoriteListUiEvent>()
+    val uiEvent: SharedFlow<FavoriteListUiEvent> = _uiEvent
+
     val productList = mutableListOf<ProductListViewItem>()
 
     private var isFavoriteJob = false
@@ -101,16 +107,12 @@ class FavoriteViewModel @Inject constructor(
         viewModelScope.launch {
             removeFavoriteUseCase.invoke(FavoriteProduct(id)).collect{response->
                 when (response) {
-                    is Resource.Error -> {
-                        _uiState.value = FavoriteListUiState.Error(response.message)
-                    }
+                    is Resource.Error ->Unit
 
-                    Resource.Loading -> {
-                        _uiState.value = FavoriteListUiState.Loading
-                    }
+                    Resource.Loading -> Unit
 
                     is Resource.Success -> {
-                        _uiState.value = FavoriteListUiState.RemoveFavorite
+                        _uiEvent.emit(FavoriteListUiEvent.RemovedFavorite)
                         loadCartItemCount()
                     }
                 }
@@ -123,10 +125,13 @@ class FavoriteViewModel @Inject constructor(
     }
 }
 
+sealed interface FavoriteListUiEvent {
+    data object RemovedFavorite: FavoriteListUiEvent
+}
+
 sealed interface FavoriteListUiState {
     data object Loading : FavoriteListUiState
     data class Success(val productList: List<ProductListViewItem>?) : FavoriteListUiState
-    data object RemoveFavorite : FavoriteListUiState
     data object EmptyFavorite : FavoriteListUiState
     data object Empty : FavoriteListUiState
     data object AddedBasket : FavoriteListUiState

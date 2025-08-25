@@ -25,7 +25,12 @@ abstract class BaseFragment<DB : ViewDataBinding>(
 ) : Fragment() {
 
     private var _binding: DB? = null
-    protected val binding get() = _binding!!
+
+    protected val binding: DB
+        get() = _binding ?: throw IllegalStateException(
+            "ViewBinding erişilmeye çalışıldı ama lifecycle dışında!"
+        )
+
     private var progressDialog: AlertDialog? = null
 
     override fun onCreateView(
