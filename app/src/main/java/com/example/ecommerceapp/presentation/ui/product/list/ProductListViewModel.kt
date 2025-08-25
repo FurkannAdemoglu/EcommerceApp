@@ -164,11 +164,7 @@ class ProductListViewModel @Inject constructor(
                 if (item is ProductListViewItem.ItemProductListViewItem) {
                     val matchesBrand = selectedBrands.isEmpty() || selectedBrands.contains(item.product.brand)
                     val matchesModel = selectedModels.isEmpty() || selectedModels.contains(item.product.model)
-                    val matchesSearch = searchQuery.isEmpty() || (
-                            item.product.name.contains(searchQuery, true) ||
-                                    item.product.brand.contains(searchQuery, true) ||
-                                    item.product.model.contains(searchQuery, true)
-                            )
+                    val matchesSearch = searchQuery.isEmpty() || (item.product.name.contains(searchQuery, true))
                     matchesBrand && matchesModel && matchesSearch
                 } else false
             }.toMutableList()
