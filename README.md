@@ -8,6 +8,45 @@ Groovy:        3.0.22
 Ant:           Apache Ant(TM) version 1.10.14 compiled on August 16 2023
 Launcher JVM:  11.0.12 (Oracle Corporation 11.0.12+8-LTS-237)
 
+## Features
+Add Favorite
+
+Remove Favorite
+
+Infinite Scroll
+
+Add To Cart
+
+Remove Cart
+
+Basket Badge Update
+
+## Technoloies In The Project
+
+MVVM architecture
+
+Retrofit
+
+Kotlin Coroutine
+
+Navigation
+
+Hilt
+
+Fragments
+
+Glide
+
+Flow
+
+Room
+
+StateFlow - Sharedflow
+
+Infinite Scroll
+
+JUnit
+
 
 
 <img width="302" height="586" alt="Ekran Resmi 2025-08-24 22 15 19" src="https://github.com/user-attachments/assets/6df2eddc-ac4c-456a-a86c-dca01751e3d0" />
